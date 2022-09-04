@@ -198,7 +198,7 @@ class DataBase:
 
         cursor = self.conn.cursor()
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS individual_meter_cold_water(
+        CREATE TABLE IF NOT EXISTS individual_meter_water(
             id INTEGER PRIMARY KEY,
             luna INTEGER NOT NULL,
             anul INTEGER NOT NULL,
@@ -226,7 +226,7 @@ class DataBase:
     def add_flats(self, flats_data):
         cursor = self.conn.cursor()
         cursor.execute("""
-        INSERT INTO block_of_flats(nr_apartament, nume_proprietar, etaj, camere, nr_persoane, block_id)
+        INSERT INTO flat(nr_apartament, nume_proprietar, etaj, camere, nr_persoane, block_id)
         VALUES(?, ?, ?, ?, ?, ?)
         """, (flats_data["nr_apartament"], flats_data["nume_proprietar"], flats_data["etaj"], flats_data["camere"], 
         flats_data["nr_persoane"], flats_data["block_id"]))
@@ -266,10 +266,29 @@ class DataBase:
     def add_individual_meter_water(self, individual_meter_data):
         cursor = self.conn.cursor()
         cursor.execute("""
-        INSERT INTO individual_meter_cold_water(luna, anul, index_apa_rece, index_apa_calda, nr_apartament, block_id)
+        INSERT INTO individual_meter_water(luna, anul, index_apa_rece, index_apa_calda, nr_apartament, block_id)
         VALUES(?, ?, ?, ?, ?, ?)
         """, (individual_meter_data["luna"], individual_meter_data["anul"], individual_meter_data["index_apa_rece"], 
         individual_meter_data["index_apa_calda"], individual_meter_data["nr_apartament"], individual_meter_data["block_id"]))
+        
+        self.conn.commit()
+
+    def update_block(self):
+        pass
+
+    def update_flat(self):
+        pass
+    
+    def select_flat_with_individual_meter(self):
+        if not isinstance(self.conn, sqlite3.Connection):
+            raise TypeError("Not a DB connection object.")
+
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT im.luna, im.anul, im.index_apa_rece, im.index_apa_calda, im.nr_apartament, im.block_id
+            FROM individual_meter_water as im
+            INNER JOIN flat ON im.nr_apartament=flat.nr_apartament
+            """)
         
         self.conn.commit()
 
@@ -295,6 +314,40 @@ class Suite:
         self.__nr_persoane = suite_data["nr_persoane"]
         self.__block_id = suite_data["block_id"]
 
+class GasInvoice:
+    
+    def __init__(self, gas_invoice_data):
+        self.__cod_client = gas_invoice_data["cod_client"]
+        self.__nr_factura = gas_invoice_data["nr_factura"]
+        self.__data_emitere = gas_invoice_data["data_emitere"]
+        self.__data_scadenta = gas_invoice_data["data_scadenta"]
+        self.__consum_kwh = gas_invoice_data["consum_kwh"]
+        self.__valoare_kwh = gas_invoice_data["valoare_kwh"]
+        self.__valoarea_totala = gas_invoice_data["valoarea_totala"]
+        self.__block_id = gas_invoice_data["block_id"]
+
+class WaterInvoice:
+    
+    def __init__(self, water_invoice_data):
+        self.__cod_client = water_invoice_data["cod_client"]
+        self.__nr_factura = water_invoice_data["nr_factura"]
+        self.__data_emitere = water_invoice_data["data_emitere"]
+        self.__data_scadenta = water_invoice_data["data_scadenta"]
+        self.__consum_m3 = water_invoice_data["consum_m3"]
+        self.__valoare_m3 = water_invoice_data["valoare_m3"]
+        self.__valoarea_totala = water_invoice_data["valoarea_totala"]
+        self.__block_id = water_invoice_data["block_id"]
+
+class IndividualMeter:
+
+    def __init__(self, individual_water_data):
+        self.__luna = individual_water_data["luna"]
+        self.__anul = individual_water_data["anul"]
+        self.__index_apa_rece = individual_water_data["index_apa_rece"]
+        self.__index_apa_calda = individual_water_data["index_apa_calda"]
+        self.__nr_apartament = individual_water_data["nr_apartament"]       
+        self.__block_id = individual_water_data["block_id"]
+
 
 try:
     make_table = DataBase(DB_FILE)
@@ -307,35 +360,34 @@ try:
     make_table.individual_meter_water()
 except (sqlite3.Error, TypeError) as err:
      logging.critical(err)
-else:
-    try:
-        block_input = Menu.add_block_of_flats_menu()
-        block1 = BlockFlats(block_input)
-        make_table.add_block_of_flats(block_input)
-
-        suite_input = Menu.add_flat_menu()
-        flat1 = Suite(suite_input)
-        make_table.add_flats(suite_input)
-    except sqlite3.Error as err:
-        logging.error(err)
-
-
-
-"""
+# else:
 #     try:
 #         block_input = Menu.add_block_of_flats_menu()
-#         flat_input = Menu.add_flat_menu()
-#         gas_invoice_input = Menu.add_gas_invoice_menu()
-#         cold_water_invoice_input = Menu.add_cold_water_invoice_menu()
-#         hot_water_invoice_input = Menu.add_hot_water_invoice_menu()
-#         individual_meter_input = Menu.add_individual_meter_water_menu()
-
+#         #block1 = BlockFlats(block_input)
 #         make_table.add_block_of_flats(block_input)
-#         # make_table.add_flats(flat_input)
-#         # make_table.add_gas_invoice(gas_invoice_input)
-#         # make_table.add_cold_water_invoice(cold_water_invoice_input)
-#         # make_table.add_hot_water_invoice(hot_water_invoice_input)
-#         # make_table.add_individual_meter_water(individual_meter_input)
+
+#         suite_input = Menu.add_flat_menu()
+#         #flat1 = Suite(suite_input)
+#         make_table.add_flats(suite_input)
+
+#         gas_invoice_input = Menu.add_gas_invoice_menu()
+#         #gas_invoice1 = GasInvoice(gas_invoice_input)
+#         make_table.add_gas_invoice(gas_invoice_input)
+
+#         cold_water_invoice_input = Menu.add_cold_water_invoice_menu()
+#         #cold_water_invoice1 = WaterInvoice(cold_water_invoice_input)
+#         make_table.add_cold_water_invoice(cold_water_invoice_input)
+
+#         hot_water_invoice_input = Menu.add_hot_water_invoice_menu()
+#         #hot_water_invoice1 = WaterInvoice(hot_water_invoice_input)
+#         make_table.add_hot_water_invoice(hot_water_invoice_input)
+
+#         individual_meter_input = Menu.add_individual_meter_water_menu()
+#         #individual_meter1 = IndividualMeter(individual_meter_input)
+#         make_table.add_individual_meter_water(individual_meter_input)
+
 #     except sqlite3.Error as err:
 #         logging.error(err)
-"""
+
+
+

@@ -27,9 +27,9 @@ def get_menu_add_invoices():
     """Show Invoices menu items asking the user for a choice."""
     choice_ok = False
     menu_invoices_entries = {
-        1: {"text": "Adauga Factura de Gaze.", "f": Menu.add_gas_invoice_menu},
-        2: {"text": "Adauga Factura de Apa Rece.", "f": Menu.add_cold_water_invoice_menu},
-        3: {"text": "Adauga Factura de Apa Calda.", "f": Menu.add_hot_water_invoice_menu},
+        1: {"text": "Adauga Factura Gaze.", "f": Menu.add_gas_invoice_menu},
+        2: {"text": "Adauga Factura Apa Rece.", "f": Menu.add_cold_water_invoice_menu},
+        3: {"text": "Adauga Factura Apa Calda.", "f": Menu.add_hot_water_invoice_menu},
         0: {"text": "Revino la meniul principal.", "f": sys.exit}
     }
     while not choice_ok:
@@ -51,11 +51,11 @@ def get_main_menu_choice():
     m_menu_entries = {
         1: {"text": "Adauga Bloc.", "f": Menu.add_block_of_flats_menu},
         2: {"text": "Adauga Apartament.", "f": Menu.add_flat_menu},
-        3: {"text": "Editare Bloc.", "f": DataBase.add_block_of_flats},
-        4: {"text": "Editare Apartament.", "f": DataBase.add_block_of_flats},
+        3: {"text": "Editare Bloc.", "f": DataBase.update_block},
+        4: {"text": "Editare Apartament.", "f": DataBase.update_flat},
         5: {"text": "Adauga Contract.", "f": get_menu_add_invoices},
         6: {"text": "Adauga Index apa.", "f": Menu.add_individual_meter_water_menu},
-        7: {"text": "Print Raport.", "f": DataBase.add_block_of_flats},
+        7: {"text": "Print Raport.", "f": DataBase.select_flat_with_individual_meter},
         0: {"text": "Inchide Programul.", "f": sys.exit}
 
     }
